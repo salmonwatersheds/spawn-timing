@@ -5,15 +5,29 @@
 # Session Data files
 .RData
 
+# Documents
+docs/
+
 # Data files
 data/*.csv
+data/*.xls
+
+
+# ignore output files/folders
 output/NuSEDS-spawn-timing.csv
+output/figures
+output/archive
+output/ignore
+output/*.rds
 
 # Ignore code
 code/ignore
 
 # Example code in package build process
 *-Ex.R
+
+# Ignore all pdfs
+*.pdf
 
 # Output files from R CMD build
 /*.tar.gz
@@ -44,3 +58,4 @@ rsconnect/
 
 # macOS desktop services store
 .DS_Store
+

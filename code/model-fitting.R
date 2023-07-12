@@ -51,15 +51,15 @@ for(i in 1:length(CUs)){
 jagsDat <- list(
   
   # Counters
-  # n = length(ind.ss),
+  n = length(ind.ss),
   nCUs = length(CUs),
   # nRegions = length(regions),
   
   # Other variables
   # year = dat$ANALYSIS_YR[ind.ss],
-  # region = as.numeric(factor(dat$REGION[ind.ss], levels = regions)),
+  region = as.numeric(factor(dat$REGION[ind.ss], levels = regions)),
   CU = as.numeric(factor(dat$SQ_CU_NAME[ind.ss], levels = CUs))
-  # region_CU = as.numeric(factor(regions_CU, levels = regions))
+  region_CU = as.numeric(factor(regions_CU, levels = regions))
 
 )
 
