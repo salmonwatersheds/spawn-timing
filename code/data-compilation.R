@@ -20,10 +20,10 @@ library(dplyr)
 # NuSEDS takes a while to import; increase timout time to 190 sec
 options(timeout = 190)
 
-# OPTION #1: Import most recent data from URL
-nusedsName <- paste0("data/all_areas_nuseds_", strftime(Sys.Date(), format = "%Y%m%d"), ".csv")
-download.file("https://api-proxy.edh.azure.cloud.dfo-mpo.gc.ca/catalogue/records/c48669a3-045b-400d-b730-48aafe8c5ee6/attachments/All%20Areas%20NuSEDS.csv", destfile = nusedsName)
-
+# # OPTION #1: Import most recent data from URL
+# nusedsName <- paste0("data/all_areas_nuseds_", strftime(Sys.Date(), format = "%Y%m%d"), ".csv")
+# download.file("https://api-proxy.edh.azure.cloud.dfo-mpo.gc.ca/catalogue/records/c48669a3-045b-400d-b730-48aafe8c5ee6/attachments/All%20Areas%20NuSEDS.csv", destfile = nusedsName)
+# 
 # OPTION #2: use most recent file that's already downloaded
 z <- list.files(path = "data/")
 zz <- z[grep(pattern = "all_areas_nuseds_", z)]
@@ -117,17 +117,18 @@ nuseds_cu$REGION[which(nuseds_cu$CU_NAME %in% c("CLEMENTS", "SPLIT MOUNTAIN/LEVE
 
 nuseds_cu$REGION[which(nuseds_cu$CU_NAME %in% c("SOUTHERN FJORDS", "SOUTHERN BC-CROSS-CU SUPPLEMENTATION EXCLUSION<<BIN>>", "(N)GLENDALE", "OWOSSITSA", "GREAT CENTRAL/SPROAT<<BIN>>", "PACK", "SOUTH-MISCELLANEOUS<<BIN>>", "HOMATHKO-KLINAKLINI-SMITH-RIVERS-BELLA COOLA-DEAN"))] <- "Vancouver Island & Mainland Inlets"
 
-nuseds_cu$REGION[which(nuseds_cu$CU_NAME %in% c("(P)HATCHERY EXCLUSION-PALLANT CREEK", "(N)MAYER", "NORTH HAIDA GWAII", "EAST HAIDA GWAII"))] <- "HaidaGwaii"
+nuseds_cu$REGION[which(nuseds_cu$CU_NAME %in% c("(P)HATCHERY EXCLUSION-PALLANT CREEK", "(N)MAYER", "NORTH HAIDA GWAII", "EAST HAIDA GWAII"))] <- "Haida Gwaii"
 
 
 # Somehow some populations with no CU were assigned to the wrong region sometimes. Reassign.
+nuseds_cu$REGION[which(nuseds_cu$SYSTEM_SITE == "VILLAGE BAY CREEK")] <- "Vancouver Island & Mainland Inlets"
 nuseds_cu$REGION[which(nuseds_cu$WATERBODY == "WHALEN CREEK" & nuseds_cu$SPECIES == "Chinook")] <- "Central Coast"
 nuseds_cu$REGION[which(nuseds_cu$WATERBODY == "OWEEGEE CREEK" & nuseds_cu$SPECIES %in% c("Pink", "Chum"))] <- "Nass"
 nuseds_cu$REGION[which(nuseds_cu$WATERBODY == "SYLVIA CREEK" & nuseds_cu$SPECIES == "Chinook")] <- "Central Coast"
 nuseds_cu$REGION[which(nuseds_cu$WATERBODY == "SOMASS-SPROAT-GC SYSTEM")] <- "Vancouver Island & Mainland Inlets"
 nuseds_cu$REGION[which(nuseds_cu$WATERBODY == "PACK LAKE CREEK")] <- "Vancouver Island & Mainland Inlets"
 nuseds_cu$REGION[which(nuseds_cu$WATERBODY == "SHAWNIGAN CREEK")] <- "Vancouver Island & Mainland Inlets"
-
+nuseds_cu$REGION[which(nuseds_cu$POPULATION == "Aberdeen Creek (Lower Skeena) Coho")] <- "Skeena"
 #------------------------------------------------------------------------------
 # Change spawn timing dates into DOY
 #------------------------------------------------------------------------------

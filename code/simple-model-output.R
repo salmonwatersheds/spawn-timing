@@ -256,174 +256,174 @@ for(s in 1:length(speciesNames)){
 
 
 
-write.csv(st_hyper, file = "output/spawn-timing_regions_50_lakeriversep.csv", row.names = FALSE)
-write.csv(st_CU, file = "output/spawn-timing_CUs_50_lakeriversep.csv", row.names = FALSE)
+write.csv(st_hyper, file = "output/spawn-timing_regions_50_lakeriversep_brks.csv", row.names = FALSE)
+write.csv(st_CU, file = "output/spawn-timing_CUs_50_lakeriversep_brks.csv", row.names = FALSE)
 
-###############################################################################
-# Compare mean, mode 50
-###############################################################################
-
-plot(st_CU$start_spawn_mode, st_CU$start_spawn_50)
-abline(a = 0, b = 1, lty = 2)
-length(which(abs(st_CU$start_spawn_mode - st_CU$start_spawn_50) > 1)) #26
-length(which(abs(st_CU$start_spawn_mode - st_CU$start_spawn_50) > 14)) #9
-st_CU[which(abs(st_CU$start_spawn_mode - st_CU$start_spawn_50) > 14), c("SQ_CU_NAME", "start_spawn_mean", "start_spawn_mode", "start_spawn_50")]
-
-plot(st_CU$end_spawn_mode, st_CU$end_spawn_50)
-abline(a = 0, b = 1, lty = 2)
-length(which(abs(st_CU$end_spawn_mode - st_CU$end_spawn_50) > 1)) #26
-length(which(abs(st_CU$end_spawn_mode - st_CU$end_spawn_50) > 14)) #9
-st_CU[which(abs(st_CU$end_spawn_mode - st_CU$end_spawn_50) > 14), c("SQ_CU_NAME", "end_spawn_mean", "end_spawn_mode", "end_spawn_50")]
-
-# Which CUs have more than a day difference?
-ind <- which(abs(st_CU$sd_spawn_mean - st_CU$sd_spawn_mode) > 40)
-abs(st_CU$sd_spawn_mean - st_CU$sd_spawn_mode)[ind]
-st_CU[ind, c("SQ_CU_NAME", "sd_spawn_mean", "sd_spawn_mode", "sd_spawn_50")]
-st_CU[ind, c("SQ_CU_NAME", "start_spawn_mean", "start_spawn_mode")]
-
-
-for(i in ind){
-  
-  # Selected species (ss)
-  ss <- speciesNames[as.numeric(factor(st_CU$SPECIES_QUALIFIED[i], levels = unique(st_CU$SPECIES_QUALIFIED)))]
-  
-  # Extract output
-  # Subset dat for that species
-  dat.ss <- dat[which(dat$SPECIES == ss & !is.na(dat$CU_NAME)), ]
-  jagsDat <- readRDS(paste0("output/jagsDat_", ss, ".rds"))
-  
-  regionNames.ss <- sort(unique(dat.ss$REGION))
-  cuNames.ss <- sort(unique(dat.ss$SQ_CU_NAME)) 
-  
-  
-  fit <- readRDS(file = paste0("output/simple-model-fit_", ss, ".rds"))
-  fit3 <- as.mcmc(rbind(fit[[1]], fit[[2]], fit[[3]]))
-  
-  st_CU$cuid[i]
-  j <- which(cuNames.ss == st_CU$SQ_CU_NAME[i])
-  hist(fit3[, paste0("mu_CU[", j, "]")] - 1.96 * fit3[, paste0("sig_CU[", j, "]")], breaks = seq(-10000, 10000, 7), xlim = c(0, 365), xaxs = 'i')
-  abline(v = st_CU$start_spawn_mean[i], col = 2, lwd = 2)
-  abline(v = st_CU$start_spawn_mode[i], col = 4, lwd = 2)
-  abline(v = st_CU$start_spawn_50[i], col = 5, lwd = 2)
-  
-}
-
-###############################################################################
-###############################################################################
-# # Region hyperparameter
-# nCU <- jagsDat$nCUs
-# nR <- jagsDat$nRegions
+# ###############################################################################
+# # Compare mean, mode 50
+# ###############################################################################
 # 
-# ind <- list(
-#   muArrive = match(paste0("muArrive[", 1:nR, "]"), pnames),
-#   # sdArrive = match(paste0("sdArrive[", 1:nR, "]"), pnames),
-#   muArrive_CU = match(paste0("muArrive_CU[", 1:nCU, "]"), pnames),
-#   muSpawn = match(paste0("muSpawn[", 1:nR, "]"), pnames),
-#   # sdSpawn = match(paste0("sdSpawn[", 1:nR, "]"), pnames),
-#   muSpawn_CU = match(paste0("muSpawn_CU[", 1:nCU, "]"), pnames),
-#   sdSpawn_CU = match(paste0("sdSpawn_CU[", 1:nCU, "]"), pnames)
-# )
-
-# Plot regional output
-colsCU <- viridis(jagsDat$nCUs)
-
-quartz(width = 8, height = 6, pointsize = 10)
-par(mfrow = c(3,2))
-
-for(i in 1:nR){ # for each region
-  
-  x <- seq(min(S[[1]][ind$muArrive_CU[unique(jagsDat$CU[jagsDat$region == i])], 'Mean']), max(S[[1]][ind$muArrive_CU[unique(jagsDat$CU[jagsDat$region == i])], 'Mean']), 0.1)
-  
-  if(length(x) == 1) x <- seq(x - 15, x + 15, 0.1)
-  
-  y <- dnorm(x, mean = S[[1]][ind$muArrive[i], 'Mean'], sd = S[[1]][ind$sdArrive[i], "Mean"])
-  
-  plot(x, y/max(y), "l", lwd = 4, col = grey(0.8), xlab = "", ylab = "Arrival time", bty = "l", las = 1, yaxt = "n", main = regions[i])
-  
-  for(j in unique(jagsDat$CU[jagsDat$region == i])){
-    abline(v = S[[1]][ind$muArrive_CU[j], 'Mean'], col = colsCU[j])
-  } # end j
-} # end i
-
-
-
-####
-
-# Choose region
-r <- 1
-
-# Choose CU
-cu_ind <- which(regions_CU == regions[r])
-
-cols1 <- viridis(length(cu_ind), alpha = 0.3)
-cols2 <- viridis(length(cu_ind), alpha = 1)
-
-hist(arrival[jagsDat$CU %in% cu_ind, ], freq = FALSE, breaks = seq(0, 366, 7), yaxs = "i", border = NA)
-for(i in 1:length(cu_ind)){
-  hist(arrival[jagsDat$CU == cu_ind[i], ], freq = FALSE, add = TRUE, border = NA, col = cols1[i], xpd = NA, yaxs = "i", breaks = seq(0, 366, 7))
-  
-  y <- dnorm(dumx, mean = modes[ind$muArrive_CU[cu_ind[i]]], 0.5*modes[ind$sdArrive[r]])
-  lines(dumx, y/max(y)*3500, col = cols2[i])
-  
-}
-
-# Mean times match but not SD
-# What about spawn timing?
-i <- 2
-
-hist(peak[jagsDat$CU == cu_ind[i], ], freq = FALSE, breaks = seq(0, 366, 7), yaxs = "i", border = "white", xlim = c(200, 300))
-lines(density(peak[jagsDat$CU == cu_ind[i], ], na.rm = TRUE), col = grey(0.6))
-
-hist(start[jagsDat$CU == cu_ind[i], ], freq = FALSE, breaks = seq(0, 366, 7), yaxs = "i", border = "white", col = "#00FF0030", add = TRUE)
-hist(end[jagsDat$CU == cu_ind[i], ], freq = FALSE, breaks = seq(0, 366, 7), yaxs = "i", border = "white", col = "#FF000030", add = TRUE)
-
-y <- dnorm(dumx, mean = modes[ind$muSpawn_CU[cu_ind[i]]], modes[ind$sdSpawn_CU[cu_ind[i]]])
-lines(dumx, y/max(y)*0.04, lwd =1.5)
-
-##
-# Look at regional muArrive compared to prior
-
-hist(fit[[1]][, 1], freq=FALSE)
-dumx <- seq(1, 365, 0.1)
-lines(dumx, dnorm(dumx, 230, 20)*10)
-
-#------------------------------------------------------------------------------
-# compare approaches
-#------------------------------------------------------------------------------
-spQ <- data.frame(SPECIES_QUALIFIED = c( "CK","CM","CO","PKE", "PKO", "SEL", "SER"),
-                  species = c("Chinook", "Chum", "Coho", "Pink", "Pink", "Sockeye", "Sockeye"))
-st_CU$species <- spQ$species[match(st_CU$SPECIES_QUALIFIED, spQ$SPECIES_QUALIFIED)]
-regionCols <- rainbow(9)
-regionNames <- c("Yukon", "AlaskaTransboundary", "Nass" , "Skeena", "HaidaGwaii", "Central Coast",  "Vancouver Island & Mainland Inlets", "Fraser", "Columbia")
-
-for(s in 1:5){
-  n.s <- length(which(st_CU$species == unique(spQ$species)[s]))
-  plot(c(0,365), c(1, n.s), "n", xlim = c(100, 365))
-  n.sr <- 0
-  for(r in 1:length(regionNames)){
-    st <- st_CU[which(st_CU$species == unique(spQ$species)[s] & st_CU$region == regionNames[r]), ]
-    if(nrow(st) > 0){
-      # 90% hpdi
-      segments(x0 = st$start_spawn_lower90, 
-               x1 = st$end_spawn_upper90, 
-               y0 = n.s - n.sr - c(1:nrow(st)), 
-               y1 = n.s - n.sr - c(1:nrow(st)), 
-               lwd = 10, col = paste0(regionCols[r], 30))
-      # 80% hpdi
-      segments(x0 = st$start_spawn_lower80, 
-               x1 = st$end_spawn_upper80, 
-               y0 = n.s - n.sr - c(1:nrow(st)), 
-               y1 = n.s - n.sr - c(1:nrow(st)), 
-               lwd = 6, col = paste0(regionCols[r], 40))
-      
-      # mode
-      segments(x0 = st$start_spawn, 
-               x1 = st$end_spawn, 
-               y0 = n.s - n.sr - c(1:nrow(st)), 
-               y1 = n.s - n.sr - c(1:nrow(st)), 
-               lwd = 2, col = regionCols[r])
-    }
-    n.sr <- n.sr + nrow(st)
-  } # end region
-  mtext(side = 3, line = 1, unique(spQ$species)[s])
-}
+# plot(st_CU$start_spawn_mode, st_CU$start_spawn_50)
+# abline(a = 0, b = 1, lty = 2)
+# length(which(abs(st_CU$start_spawn_mode - st_CU$start_spawn_50) > 1)) #26
+# length(which(abs(st_CU$start_spawn_mode - st_CU$start_spawn_50) > 14)) #9
+# st_CU[which(abs(st_CU$start_spawn_mode - st_CU$start_spawn_50) > 14), c("SQ_CU_NAME", "start_spawn_mean", "start_spawn_mode", "start_spawn_50")]
+# 
+# plot(st_CU$end_spawn_mode, st_CU$end_spawn_50)
+# abline(a = 0, b = 1, lty = 2)
+# length(which(abs(st_CU$end_spawn_mode - st_CU$end_spawn_50) > 1)) #26
+# length(which(abs(st_CU$end_spawn_mode - st_CU$end_spawn_50) > 14)) #9
+# st_CU[which(abs(st_CU$end_spawn_mode - st_CU$end_spawn_50) > 14), c("SQ_CU_NAME", "end_spawn_mean", "end_spawn_mode", "end_spawn_50")]
+# 
+# # Which CUs have more than a day difference?
+# ind <- which(abs(st_CU$sd_spawn_mean - st_CU$sd_spawn_mode) > 40)
+# abs(st_CU$sd_spawn_mean - st_CU$sd_spawn_mode)[ind]
+# st_CU[ind, c("SQ_CU_NAME", "sd_spawn_mean", "sd_spawn_mode", "sd_spawn_50")]
+# st_CU[ind, c("SQ_CU_NAME", "start_spawn_mean", "start_spawn_mode")]
+# 
+# 
+# for(i in ind){
+#   
+#   # Selected species (ss)
+#   ss <- speciesNames[as.numeric(factor(st_CU$SPECIES_QUALIFIED[i], levels = unique(st_CU$SPECIES_QUALIFIED)))]
+#   
+#   # Extract output
+#   # Subset dat for that species
+#   dat.ss <- dat[which(dat$SPECIES == ss & !is.na(dat$CU_NAME)), ]
+#   jagsDat <- readRDS(paste0("output/jagsDat_", ss, ".rds"))
+#   
+#   regionNames.ss <- sort(unique(dat.ss$REGION))
+#   cuNames.ss <- sort(unique(dat.ss$SQ_CU_NAME)) 
+#   
+#   
+#   fit <- readRDS(file = paste0("output/simple-model-fit_", ss, ".rds"))
+#   fit3 <- as.mcmc(rbind(fit[[1]], fit[[2]], fit[[3]]))
+#   
+#   st_CU$cuid[i]
+#   j <- which(cuNames.ss == st_CU$SQ_CU_NAME[i])
+#   hist(fit3[, paste0("mu_CU[", j, "]")] - 1.96 * fit3[, paste0("sig_CU[", j, "]")], breaks = seq(-10000, 10000, 7), xlim = c(0, 365), xaxs = 'i')
+#   abline(v = st_CU$start_spawn_mean[i], col = 2, lwd = 2)
+#   abline(v = st_CU$start_spawn_mode[i], col = 4, lwd = 2)
+#   abline(v = st_CU$start_spawn_50[i], col = 5, lwd = 2)
+#   
+# }
+# 
+# ###############################################################################
+# ###############################################################################
+# # # Region hyperparameter
+# # nCU <- jagsDat$nCUs
+# # nR <- jagsDat$nRegions
+# # 
+# # ind <- list(
+# #   muArrive = match(paste0("muArrive[", 1:nR, "]"), pnames),
+# #   # sdArrive = match(paste0("sdArrive[", 1:nR, "]"), pnames),
+# #   muArrive_CU = match(paste0("muArrive_CU[", 1:nCU, "]"), pnames),
+# #   muSpawn = match(paste0("muSpawn[", 1:nR, "]"), pnames),
+# #   # sdSpawn = match(paste0("sdSpawn[", 1:nR, "]"), pnames),
+# #   muSpawn_CU = match(paste0("muSpawn_CU[", 1:nCU, "]"), pnames),
+# #   sdSpawn_CU = match(paste0("sdSpawn_CU[", 1:nCU, "]"), pnames)
+# # )
+# 
+# # Plot regional output
+# colsCU <- viridis(jagsDat$nCUs)
+# 
+# quartz(width = 8, height = 6, pointsize = 10)
+# par(mfrow = c(3,2))
+# 
+# for(i in 1:nR){ # for each region
+#   
+#   x <- seq(min(S[[1]][ind$muArrive_CU[unique(jagsDat$CU[jagsDat$region == i])], 'Mean']), max(S[[1]][ind$muArrive_CU[unique(jagsDat$CU[jagsDat$region == i])], 'Mean']), 0.1)
+#   
+#   if(length(x) == 1) x <- seq(x - 15, x + 15, 0.1)
+#   
+#   y <- dnorm(x, mean = S[[1]][ind$muArrive[i], 'Mean'], sd = S[[1]][ind$sdArrive[i], "Mean"])
+#   
+#   plot(x, y/max(y), "l", lwd = 4, col = grey(0.8), xlab = "", ylab = "Arrival time", bty = "l", las = 1, yaxt = "n", main = regions[i])
+#   
+#   for(j in unique(jagsDat$CU[jagsDat$region == i])){
+#     abline(v = S[[1]][ind$muArrive_CU[j], 'Mean'], col = colsCU[j])
+#   } # end j
+# } # end i
+# 
+# 
+# 
+# ####
+# 
+# # Choose region
+# r <- 1
+# 
+# # Choose CU
+# cu_ind <- which(regions_CU == regions[r])
+# 
+# cols1 <- viridis(length(cu_ind), alpha = 0.3)
+# cols2 <- viridis(length(cu_ind), alpha = 1)
+# 
+# hist(arrival[jagsDat$CU %in% cu_ind, ], freq = FALSE, breaks = seq(0, 366, 7), yaxs = "i", border = NA)
+# for(i in 1:length(cu_ind)){
+#   hist(arrival[jagsDat$CU == cu_ind[i], ], freq = FALSE, add = TRUE, border = NA, col = cols1[i], xpd = NA, yaxs = "i", breaks = seq(0, 366, 7))
+#   
+#   y <- dnorm(dumx, mean = modes[ind$muArrive_CU[cu_ind[i]]], 0.5*modes[ind$sdArrive[r]])
+#   lines(dumx, y/max(y)*3500, col = cols2[i])
+#   
+# }
+# 
+# # Mean times match but not SD
+# # What about spawn timing?
+# i <- 2
+# 
+# hist(peak[jagsDat$CU == cu_ind[i], ], freq = FALSE, breaks = seq(0, 366, 7), yaxs = "i", border = "white", xlim = c(200, 300))
+# lines(density(peak[jagsDat$CU == cu_ind[i], ], na.rm = TRUE), col = grey(0.6))
+# 
+# hist(start[jagsDat$CU == cu_ind[i], ], freq = FALSE, breaks = seq(0, 366, 7), yaxs = "i", border = "white", col = "#00FF0030", add = TRUE)
+# hist(end[jagsDat$CU == cu_ind[i], ], freq = FALSE, breaks = seq(0, 366, 7), yaxs = "i", border = "white", col = "#FF000030", add = TRUE)
+# 
+# y <- dnorm(dumx, mean = modes[ind$muSpawn_CU[cu_ind[i]]], modes[ind$sdSpawn_CU[cu_ind[i]]])
+# lines(dumx, y/max(y)*0.04, lwd =1.5)
+# 
+# ##
+# # Look at regional muArrive compared to prior
+# 
+# hist(fit[[1]][, 1], freq=FALSE)
+# dumx <- seq(1, 365, 0.1)
+# lines(dumx, dnorm(dumx, 230, 20)*10)
+# 
+# #------------------------------------------------------------------------------
+# # compare approaches
+# #------------------------------------------------------------------------------
+# spQ <- data.frame(SPECIES_QUALIFIED = c( "CK","CM","CO","PKE", "PKO", "SEL", "SER"),
+#                   species = c("Chinook", "Chum", "Coho", "Pink", "Pink", "Sockeye", "Sockeye"))
+# st_CU$species <- spQ$species[match(st_CU$SPECIES_QUALIFIED, spQ$SPECIES_QUALIFIED)]
+# regionCols <- rainbow(9)
+# regionNames <- c("Yukon", "AlaskaTransboundary", "Nass" , "Skeena", "HaidaGwaii", "Central Coast",  "Vancouver Island & Mainland Inlets", "Fraser", "Columbia")
+# 
+# for(s in 1:5){
+#   n.s <- length(which(st_CU$species == unique(spQ$species)[s]))
+#   plot(c(0,365), c(1, n.s), "n", xlim = c(100, 365))
+#   n.sr <- 0
+#   for(r in 1:length(regionNames)){
+#     st <- st_CU[which(st_CU$species == unique(spQ$species)[s] & st_CU$region == regionNames[r]), ]
+#     if(nrow(st) > 0){
+#       # 90% hpdi
+#       segments(x0 = st$start_spawn_lower90, 
+#                x1 = st$end_spawn_upper90, 
+#                y0 = n.s - n.sr - c(1:nrow(st)), 
+#                y1 = n.s - n.sr - c(1:nrow(st)), 
+#                lwd = 10, col = paste0(regionCols[r], 30))
+#       # 80% hpdi
+#       segments(x0 = st$start_spawn_lower80, 
+#                x1 = st$end_spawn_upper80, 
+#                y0 = n.s - n.sr - c(1:nrow(st)), 
+#                y1 = n.s - n.sr - c(1:nrow(st)), 
+#                lwd = 6, col = paste0(regionCols[r], 40))
+#       
+#       # mode
+#       segments(x0 = st$start_spawn, 
+#                x1 = st$end_spawn, 
+#                y0 = n.s - n.sr - c(1:nrow(st)), 
+#                y1 = n.s - n.sr - c(1:nrow(st)), 
+#                lwd = 2, col = regionCols[r])
+#     }
+#     n.sr <- n.sr + nrow(st)
+#   } # end region
+#   mtext(side = 3, line = 1, unique(spQ$species)[s])
+# }
