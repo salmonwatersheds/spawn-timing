@@ -134,7 +134,7 @@ dat2$DQ_END[which((dat2$nYears_END_SPAWN_DT - dat2$nYearsOutside_END_SPAWN_DT) >
 dat2$DQ_END[which((dat2$nYears_END_SPAWN_DT - dat2$nYearsOutside_END_SPAWN_DT) < 5 & (dat2$nYears_END_SPAWN_DT - dat2$nYearsOutside_END_SPAWN_DT) > 0)] <- 2
 hist(dat2$DQ_END)
 
-# write.csv(dat2, file = "output/life-cycle-timing_byLocation.csv")
+# write.csv(dat2, file = "output/life-cycle-timing_byLocation_brks.csv")
 
 ###############################################################################
 # Summarize by CU
