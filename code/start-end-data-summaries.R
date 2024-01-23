@@ -22,15 +22,42 @@ dat <- read.csv("output/NuSEDS-spawn-timing.csv")
 # must be split into two CUs
 dat$POPULATION_CU <- paste(dat$POPULATION, dat$FULL_CU_IN, sep = "_")
 
+#------------------------------------------------------------------------------
 # Calculate average start, peak, and end per year
-dat$START_SPAWN_DT <- apply(dat[, c("START_SPAWN_DT_FROM", "START_SPAWN_DT_TO")], 1, mean, na.rm = TRUE)
+#------------------------------------------------------------------------------
+# Jan 23, 2023 Need to account for year-end changes in DOY
+
+# Start 
+start <- cbind(as.numeric(dat$START_SPAWN_DT_FROM), as.numeric(dat$START_SPAWN_DT_TO))
+# Check: Are any from < to 
+if(length(which(start[, 2] - start[, 1] < 0)) > 0) stop("START_SPAWN_DT_TO < START_SPAWN_DT_FROM")
+dat$START_SPAWN_DT <- apply(start, 1, mean, na.rm = TRUE)
 dat$START_SPAWN_DT[is.na(dat$START_SPAWN_DT)] <- NA
 
-dat$END_SPAWN_DT <- apply(dat[, c("END_SPAWN_DT_FROM", "END_SPAWN_DT_TO")], 1, mean, na.rm = TRUE)
-dat$END_SPAWN_DT[is.na(dat$END_SPAWN_DT)] <- NA
+# Peak
+peak <- cbind(as.numeric(dat$PEAK_SPAWN_DT_FROM), as.numeric(dat$PEAK_SPAWN_DT_TO)) 
+# Check: Are any from < to 
+if(length(which(peak[, 2] - peak[, 1] < 0)) > 0){
+  print(paste("START_SPAWN_DT_TO < START_SPAWN_DT_FROM for\n", dat$POPULATION_CU[which(peak[, 2] - peak[, 1] < 0)], collapse = ', '))
+}
+# For sockeye there is one where the TO doesn't make sense (Adams SEL) -> change to NA
+peak[which((peak[, 2] - peak[, 1]) < 0), 2] <- NA
 
-dat$PEAK_SPAWN_DT <- apply(dat[, c("PEAK_SPAWN_DT_FROM", "PEAK_SPAWN_DT_TO")], 1, mean, na.rm = TRUE)
+dat$PEAK_SPAWN_DT <- apply(peak, 1, mean, na.rm = TRUE)
 dat$PEAK_SPAWN_DT[is.na(dat$PEAK_SPAWN_DT)] <- NA
+
+# End - this one has numerous populations with end[, 2] < end[, 1]
+end <- cbind(as.numeric(dat$END_SPAWN_DT_FROM), as.numeric(dat$END_SPAWN_DT_TO)) # Check: Are any from < to 
+
+if(length(which(end[, 2] - end[, 1] < 0)) > 0){
+  end[which(end[, 2] - end[, 1] < 0), 2] <- 365 + end[which(end[, 2] - end[, 1] < 0), 2]
+  warning(paste0(ss, ": END_SPAWN_DT_TO < END_SPAWN_DT_FROM"))
+}
+dat$END_SPAWN_DT <- apply(end, 1, mean, na.rm = TRUE)
+
+# If end is < DOY100, add 365 so that the fitting doesn't get confused.
+dat$END_SPAWN_DT[which(dat$END_SPAWN_DT < 100)] <- dat$END_SPAWN_DT[which(dat$END_SPAWN_DT < 100)] + 365
+
 
 ###############################################################################
 # Summarize by location
