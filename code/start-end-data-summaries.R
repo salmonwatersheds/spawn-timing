@@ -32,8 +32,12 @@ start <- cbind(as.numeric(dat$START_SPAWN_DT_FROM), as.numeric(dat$START_SPAWN_D
 # Check: Are any from < to 
 if(length(which(start[, 2] - start[, 1] < 0)) > 0) stop("START_SPAWN_DT_TO < START_SPAWN_DT_FROM")
 dat$START_SPAWN_DT <- apply(start, 1, mean, na.rm = TRUE)
-dat$START_SPAWN_DT[is.na(dat$START_SPAWN_DT)] <- NA
 
+# If start (or end) is < DOY100, add 365 so that the fitting doesn't get confused.
+# I don't think this actually applies to any CUs
+dat$START_SPAWN_DT[which(dat$START_SPAWN_DT < 100)] <- dat$START_SPAWN_DT[which(dat$START_SPAWN_DT < 100)] + 365
+
+hist(dat$START_SPAWN_DT, breaks = seq(0, 465, 7), main = "START_SPAWN_DT", xlab = "", yaxs = "i", border = NA, col = grey(0.8), ylim = c(0, 1000))
 # Peak
 peak <- cbind(as.numeric(dat$PEAK_SPAWN_DT_FROM), as.numeric(dat$PEAK_SPAWN_DT_TO)) 
 # Check: Are any from < to 
@@ -46,6 +50,14 @@ peak[which((peak[, 2] - peak[, 1]) < 0), 2] <- NA
 dat$PEAK_SPAWN_DT <- apply(peak, 1, mean, na.rm = TRUE)
 dat$PEAK_SPAWN_DT[is.na(dat$PEAK_SPAWN_DT)] <- NA
 
+hist(dat$PEAK_SPAWN_DT, breaks = seq(0, 465, 7), main = "PEAK_SPAWN_DT", xlab = "", yaxs = "i", border = NA, col = grey(0.8), ylim = c(0, 1000))
+
+
+# If end is < DOY100, add 365 so that the fitting doesn't get confused.
+dat$PEAK_SPAWN_DT[which(dat$PEAK_SPAWN_DT < 100)] <- dat$PEAK_SPAWN_DT[which(dat$PEAK_SPAWN_DT < 100)] + 365
+hist(dat$PEAK_SPAWN_DT, breaks = seq(0, 465, 7), add= TRUE, border = NA, col = "#FF000050")
+
+
 # End - this one has numerous populations with end[, 2] < end[, 1]
 end <- cbind(as.numeric(dat$END_SPAWN_DT_FROM), as.numeric(dat$END_SPAWN_DT_TO)) # Check: Are any from < to 
 
@@ -54,9 +66,11 @@ if(length(which(end[, 2] - end[, 1] < 0)) > 0){
   warning(paste0(ss, ": END_SPAWN_DT_TO < END_SPAWN_DT_FROM"))
 }
 dat$END_SPAWN_DT <- apply(end, 1, mean, na.rm = TRUE)
+hist(dat$END_SPAWN_DT, breaks = seq(0, 465, 7), main = "END_SPAWN_DT", xlab = "", yaxs = "i", border = NA, col = grey(0.8), ylim = c(0, 1000))
 
 # If end is < DOY100, add 365 so that the fitting doesn't get confused.
 dat$END_SPAWN_DT[which(dat$END_SPAWN_DT < 100)] <- dat$END_SPAWN_DT[which(dat$END_SPAWN_DT < 100)] + 365
+hist(dat$END_SPAWN_DT, breaks = seq(0, 465, 7), add= TRUE, border = NA, col = "#FF000050")
 
 
 ###############################################################################
