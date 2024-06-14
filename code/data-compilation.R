@@ -129,13 +129,21 @@ nuseds_cu$REGION[which(nuseds_cu$WATERBODY == "SOMASS-SPROAT-GC SYSTEM")] <- "Va
 nuseds_cu$REGION[which(nuseds_cu$WATERBODY == "PACK LAKE CREEK")] <- "Vancouver Island & Mainland Inlets"
 nuseds_cu$REGION[which(nuseds_cu$WATERBODY == "SHAWNIGAN CREEK")] <- "Vancouver Island & Mainland Inlets"
 nuseds_cu$REGION[which(nuseds_cu$POPULATION == "Aberdeen Creek (Lower Skeena) Coho")] <- "Skeena"
+
+# Check all are filled in
+unique(nuseds_cu$CU_NAME[is.na(nuseds_cu$REGION)])
+
 #------------------------------------------------------------------------------
 # Change spawn timing dates into DOY
 #------------------------------------------------------------------------------
 
 for(j in 1:length(varNames)){
-  nuseds_cu[, varNames[j]] <- as.numeric(nuseds_cu[, varNames[j]] %>% as.Date(format="%d-%b-%y") %>% format("%j"))
- }
+  nuseds_cu[, varNames[j]] <- nuseds_cu[, varNames[j]] %>% 
+    as.Date(format="%d-%b-%y") %>% 
+    format("%j") %>%
+    as.numeric()
+}
+
 
 #------------------------------------------------------------------------------
 # QA/QC
@@ -212,6 +220,13 @@ dat1$keep <- ifelse(is.na(dat1$BREAK_YR), "Y",
 
 nuseds_cu <- dat1[which(dat1$keep == "Y"), names(nuseds_cu)]
 
+# Remove populations in CUs that have with suspicious spawn timings and may be only
+# pre-1970s data, so were not flagged above.
+# It seems likely that these populations have the same error in reporting, but lack
+# more recent data to flag it.
+brk2 <- read.csv("data/nuseds-population-breaks2.csv") 
+rm_dat <- which(nuseds_cu$ANALYSIS_YR < 1970 & nuseds_cu$CU_NAME %in% brk2$CU_NAME)
+nuseds_cu <- nuseds_cu[-rm_dat, ]
 
 ###############################################################################
 # Write output data file

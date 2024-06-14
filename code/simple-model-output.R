@@ -256,8 +256,8 @@ for(s in 1:length(speciesNames)){
 
 
 
-write.csv(st_hyper, file = "output/spawn-timing_regions_50_lakeriversep_brks.csv", row.names = FALSE)
-write.csv(st_CU, file = "output/spawn-timing_CUs_50_lakeriversep_brks.csv", row.names = FALSE)
+write.csv(st_hyper, file = paste0("output/spawn-timing_regions_50_lakeriversep_brks2_", Sys.Date(), ".csv"), row.names = FALSE)
+write.csv(st_CU, file = paste0("output/spawn-timing_CUs_50_lakeriversep_brks2_", Sys.Date(), ".csv"), row.names = FALSE)
 
 # ###############################################################################
 # # Compare mean, mode 50

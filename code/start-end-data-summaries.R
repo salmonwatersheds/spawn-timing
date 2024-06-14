@@ -175,7 +175,7 @@ dat2$DQ_END[which((dat2$nYears_END_SPAWN_DT - dat2$nYearsOutside_END_SPAWN_DT) >
 dat2$DQ_END[which((dat2$nYears_END_SPAWN_DT - dat2$nYearsOutside_END_SPAWN_DT) < 5 & (dat2$nYears_END_SPAWN_DT - dat2$nYearsOutside_END_SPAWN_DT) > 0)] <- 2
 hist(dat2$DQ_END)
 
-# write.csv(dat2, file = "output/life-cycle-timing_byLocation_brks.csv")
+write.csv(dat2, file = paste("output/life-cycle-timing_spawning_byLocation_brks2_", Sys.Date(), ".csv"))
 
 ###############################################################################
 # Summarize by CU
@@ -242,16 +242,20 @@ for(i in 1:nrow(dat3)){
   dat3$dq[i] <- min(apply(dat2[boop, c("DQ_START", "DQ_END")], 1, mean))
 } # end CUs
   
-# write.csv(dat3, file = "output/life-cycle-timing_byCU.csv")
+write.csv(dat3, file = paste0("output/life-cycle-timing_byCU_", Sys.Date(), ".csv"))
 
 ###############################################################################
 # Plot
 ###############################################################################
-rCol <- c("Yukon" = "#FF6212", "AlaskaTransboundary"="#D55E00", "Nass"="#E69F00", "Skeena"="#F0E442","HaidaGwaii" = "#009E73", "Central Coast" = "#0072B2", "Vancouver Island & Mainland Inlets" = "#56b4e9", "Fraser"="#cc79a7", "Columbia" = "grey")
+rCol <- c("Yukon" = "#FF6212", "Transboundary"="#D55E00", "Nass"="#E69F00", "Skeena"="#F0E442","Haida Gwaii" = "#009E73", "Central Coast" = "#0072B2", "Vancouver Island & Mainland Inlets" = "#56b4e9", "Fraser"="#cc79a7", "Columbia" = "#8D8D8D")
+regionNames <- names(rCol)
+regionNames[7] <- "VIMI"
 
 species <- unique(dat3$species)
 
 for(i in 1:length(species)){
+  pdf(file = paste0("output/figures/regions_", species[i], ".pdf"), width = 6, height = 7)
+  par(mar = c(12, 4, 3, 1))
   dat3.i <- dat3[which(dat3$species == species[i]), ]
   dat3.i <- dat3.i[order(as.numeric(factor(dat3.i$region, levels = names(rCol)))), ]
   ni <- nrow(dat3.i)
@@ -260,6 +264,9 @@ for(i in 1:length(species)){
   segments(x0 = dat3.i$start_spawn_10, x1 = dat3.i$end_spawn_90, y0 = ni:1, y1 = ni:1, col = paste0(rCol[dat3.i$region], 50), lwd = 3)
   segments(x0 = dat3.i$start_spawn_mean, x1 = dat3.i$end_spawn_mean, y0 = ni:1, y1 = ni:1, col = rCol[dat3.i$region], lwd = 1)
   mtext(side = 3, species[i])
+  u <- par('usr')
+  legend(u[1], u[3] - (u[4]-u[3])*0.25, fill = rCol, border = NA, legend = regionNames, xpd = NA, ncol = 3, title = "Regions")
+  dev.off()
 }
 
 

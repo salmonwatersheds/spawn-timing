@@ -24,6 +24,8 @@ dat$SQ_CU_NAME <- paste(dat$SPECIES_QUALIFIED, dat$CU_NAME, sep = " ")
 dat$SPECIES[which(dat$SPECIES_QUALIFIED == "SEL")] <- "SockeyeLake"
 dat$SPECIES[which(dat$SPECIES_QUALIFIED == "SER")] <- "SockeyeRiver"
 
+
+
 ###############################################################################
 # Define JAGS model
 ###############################################################################
