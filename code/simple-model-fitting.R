@@ -17,6 +17,10 @@ library(viridis)
 
 dat <- read.csv("output/NuSEDS-spawn-timing.csv")
 
+# # Select which data to use
+# whichData <- "brksremoved" # all or removed, brks, or brksremoved
+# dat <- read.csv(paste0("output/NuSEDS-spawn-timing_June2024_", whichData, ".csv")) # remove all data pre-1970 for certain regions and species
+
 # Create unique Species Qualified CU Name
 dat$SQ_CU_NAME <- paste(dat$SPECIES_QUALIFIED, dat$CU_NAME, sep = " ")
 
@@ -180,6 +184,7 @@ for(s in 1:length(speciesNames)){
   jagsDat$q <- qnorm(1 - (1 - p)/2)
   
   saveRDS(jagsDat, file = paste0("output/jagsDat_", ss, ".rds"))
+  # saveRDS(jagsDat, file = paste0("output/jagsDat_", ss, "_June2024_", whichData, ".rds"))
   
   ###############################################################################
   # Fit model
@@ -236,5 +241,6 @@ for(s in 1:length(speciesNames)){
   stopCluster(cl3)
 
   saveRDS(object = fit, file = paste0("output/simple-model-fit_", ss, ".rds"))
+  # saveRDS(object = fit, file = paste0("output/simple-model-fit_", ss, "_June2024_", whichData, ".rds"))
 
 } # end species

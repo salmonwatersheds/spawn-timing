@@ -82,8 +82,8 @@ unique(cu$FULL_CUNAME[is.na(cu$cuid)])
 cu[which(cu$CU_TYPE == "Current" & is.na(cu$cuid)), ] # Prudhomme and Shawatlan are missing.
 
 # Assign cuid -> CHECK WITH KATY FOR UPDATED CUID
-cu$cuid[cu$FULL_CUNAME == "SEL::PRUDHOMME"] <- 416
-cu$cuid[cu$FULL_CUNAME == "SEL::SHAWATLAN"] <- 417
+cu$cuid[cu$FULL_CUNAME == "SEL::PRUDHOMME"] <- 291
+cu$cuid[cu$FULL_CUNAME == "SEL::SHAWATLAN"] <- 292
 
 #------------------------------------------------------------------------------
 # Adding PSE region to nuseds data
@@ -220,13 +220,41 @@ dat1$keep <- ifelse(is.na(dat1$BREAK_YR), "Y",
 
 nuseds_cu <- dat1[which(dat1$keep == "Y"), names(nuseds_cu)]
 
-# Remove populations in CUs that have with suspicious spawn timings and may be only
-# pre-1970s data, so were not flagged above.
-# It seems likely that these populations have the same error in reporting, but lack
-# more recent data to flag it.
-brk2 <- read.csv("data/nuseds-population-breaks2.csv") 
-rm_dat <- which(nuseds_cu$ANALYSIS_YR < 1970 & nuseds_cu$CU_NAME %in% brk2$CU_NAME)
-nuseds_cu <- nuseds_cu[-rm_dat, ]
+# Remove data pre-1970s for CUs that had a shift in peak spawning of more than 14 days
+# or had no data pre-1970s
+rmCU <- read.csv("data/nuseds-pre1970-shift.csv")
+
+rmInd <- which((nuseds_cu$cuid %in% rmCU$cuid) & nuseds_cu$ANALYSIS_YR < 1970)
+
+nuseds_cu <- nuseds_cu[-rmInd, ]
+
+
+# #-----------------------------------------------------------------------------
+# # June 2024: Do a check comparing two output datasets:
+# # 1) Removing all timing data pre-1970 for Chinook, coho, and sockeye in Central
+# #    Coast, Nass, VIMI, and Haida Gwaii
+# 
+# rm_dat <- which(nuseds_cu$ANALYSIS_YR < 1970 & nuseds_cu$REGION %in% c("Central Coast", "Vancouver Island & Mainland Inlets", "Haida Gwaii", "Nass") & nuseds_cu$SPECIES %in% c("Sockeye", "Chinook", "Coho"))
+# nuseds_cu1 <- nuseds_cu[-rm_dat, ]
+# 
+# has.info1 <- apply(!is.na(nuseds_cu1[, varNames[3:10]]), 1, sum)
+# write.csv(nuseds_cu1[which(has.info1 > 0), ], "output/NuSEDS-spawn-timing_June2024_removed.csv", row.names = FALSE)
+# 
+# # 2) Keeping all data.
+# 
+# has.info2 <- apply(!is.na(nuseds_cu[, varNames[3:10]]), 1, sum)
+# write.csv(nuseds_cu[which(has.info2 > 0), ], "output/NuSEDS-spawn-timing_June2024_all.csv", row.names = FALSE)
+# 
+# 3) Remove data all pre-1970 (see what ones come up as different...)
+
+# rm_dat3 <- which(nuseds_cu$ANALYSIS_YR < 1970)
+# nuseds_cu3 <- nuseds_cu[-rm_dat3, ]
+# 
+# has.info3 <- apply(!is.na(nuseds_cu3[, varNames[3:10]]), 1, sum)
+# write.csv(nuseds_cu3[which(has.info3 > 0), ], "output/NuSEDS-spawn-timing_June2024_brksremoved.csv", row.names = FALSE)
+
+#-----------------------------------------------------------------------------
+
 
 ###############################################################################
 # Write output data file

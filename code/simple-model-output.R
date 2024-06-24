@@ -6,7 +6,7 @@
 # Contact: speacock at psf dot ca
 # Date: October 12, 2022
 ###############################################################################
-
+# rm(list=ls())
 library(MCMCglmm)
 
 ###############################################################################
@@ -15,6 +15,9 @@ library(MCMCglmm)
 ###############################################################################
 
 dat <- read.csv("output/NuSEDS-spawn-timing.csv")
+
+# whichData <- "brksremoved" # all or removed; comparing how CU-level timing changes under two data subsetting scenarios
+# dat <- read.csv(paste0("output/NuSEDS-spawn-timing_June2024_", whichData, ".csv")) # remove all data pre-1970 for certain regions and species
 
 # Create unique Species Qualified CU Name
 dat$SQ_CU_NAME <- paste(dat$SPECIES_QUALIFIED, dat$CU_NAME, sep = " ")
@@ -139,7 +142,8 @@ for(s in 1:length(speciesNames)){
   ss <- speciesNames[s]
   
   fit <- readRDS(file = paste0("output/simple-model-fit_", ss, ".rds"))
-
+  # fit <- readRDS(file = paste0("output/simple-model-fit_", ss, "_June2024_", whichData, ".rds"))
+  
   # Extract parameter names
   pnames <- colnames(fit[[1]])
   
@@ -167,6 +171,7 @@ for(s in 1:length(speciesNames)){
   # Subset dat for that species
   dat.ss <- dat[which(dat$SPECIES == ss & !is.na(dat$CU_NAME)), ]
   jagsDat <- readRDS(paste0("output/jagsDat_", ss, ".rds"))
+  # jagsDat <- readRDS(paste0("output/jagsDat_", ss, "_June2024_", whichData, ".rds"))
   
   regionNames.ss <- sort(unique(dat.ss$REGION))
   cuNames.ss <- sort(unique(dat.ss$SQ_CU_NAME)) 
@@ -256,8 +261,8 @@ for(s in 1:length(speciesNames)){
 
 
 
-write.csv(st_hyper, file = paste0("output/spawn-timing_regions_50_lakeriversep_brks2_", Sys.Date(), ".csv"), row.names = FALSE)
-write.csv(st_CU, file = paste0("output/spawn-timing_CUs_50_lakeriversep_brks2_", Sys.Date(), ".csv"), row.names = FALSE)
+write.csv(st_hyper, file = paste0("output/spawn-timing_regions_", Sys.Date(), ".csv"), row.names = FALSE) #whichData, "_", 
+write.csv(st_CU, file = paste0("output/spawn-timing_CUs_", Sys.Date(), ".csv"), row.names = FALSE) #whichData, "_", Sys.Date(),
 
 # ###############################################################################
 # # Compare mean, mode 50
