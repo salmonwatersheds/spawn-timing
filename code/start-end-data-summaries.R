@@ -175,7 +175,7 @@ dat2$DQ_END[which((dat2$nYears_END_SPAWN_DT - dat2$nYearsOutside_END_SPAWN_DT) >
 dat2$DQ_END[which((dat2$nYears_END_SPAWN_DT - dat2$nYearsOutside_END_SPAWN_DT) < 5 & (dat2$nYears_END_SPAWN_DT - dat2$nYearsOutside_END_SPAWN_DT) > 0)] <- 2
 hist(dat2$DQ_END)
 
-write.csv(dat2, file = paste("output/life-cycle-timing_spawning_byLocation_brks2_", Sys.Date(), ".csv"))
+write.csv(dat2, file = paste("output/life-cycle-timing_spawning_byLocation_", Sys.Date(), ".csv"))
 
 ###############################################################################
 # Summarize by CU
@@ -275,7 +275,7 @@ for(i in 1:length(species)){
 s <- "Chinook"
 r <- "HaidaGwaii"
 
-pdf(file = "output/figures/start-end-data.pdf", width = 6, height = 5)
+pdf(file = paste0("output/figures/start-end-data_", Sys.Date(), ".pdf"), width = 6, height = 5)
 for(s in species){
   for(r in unique(dat3$region[dat3$species == s])){
     ind0 <- which(dat3$species == s & dat3$region == r)
