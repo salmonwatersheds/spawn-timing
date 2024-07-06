@@ -17,6 +17,10 @@ library(viridis)
 
 dat <- read.csv("output/NuSEDS-spawn-timing.csv")
 
+# Remove Kanim SEL CU - only one old obs that is suspiscious
+rm.dat <- grep("Kanim", dat$CU_ACRO)
+dat <- dat[-rm.dat, ]
+
 # # Select which data to use
 # whichData <- "brksremoved" # all or removed, brks, or brksremoved
 # dat <- read.csv(paste0("output/NuSEDS-spawn-timing_June2024_", whichData, ".csv")) # remove all data pre-1970 for certain regions and species
@@ -240,7 +244,7 @@ for(s in 1:length(speciesNames)){
 
   stopCluster(cl3)
 
-  saveRDS(object = fit, file = paste0("output/simple-model-fit_", ss, ".rds"))
+  saveRDS(object = fit, file = paste0("output/simple-model-fit_", ss, "_", Sys.Date(), ".rds"))
   # saveRDS(object = fit, file = paste0("output/simple-model-fit_", ss, "_June2024_", whichData, ".rds"))
 
 } # end species

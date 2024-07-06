@@ -16,6 +16,10 @@ library(MCMCglmm)
 
 dat <- read.csv("output/NuSEDS-spawn-timing.csv")
 
+# Remove Kanim SEL CU - only one old obs that is suspiscious
+rm.dat <- grep("Kanim", dat$CU_ACRO)
+dat <- dat[-rm.dat, ]
+
 # whichData <- "brksremoved" # all or removed; comparing how CU-level timing changes under two data subsetting scenarios
 # dat <- read.csv(paste0("output/NuSEDS-spawn-timing_June2024_", whichData, ".csv")) # remove all data pre-1970 for certain regions and species
 
@@ -141,7 +145,7 @@ for(s in 1:length(speciesNames)){
   # Selected species (ss)
   ss <- speciesNames[s]
   
-  fit <- readRDS(file = paste0("output/simple-model-fit_", ss, ".rds"))
+  fit <- readRDS(file = paste0("output/simple-model-fit_", ss, "_2024-07-04.rds"))
   # fit <- readRDS(file = paste0("output/simple-model-fit_", ss, "_June2024_", whichData, ".rds"))
   
   # Extract parameter names
